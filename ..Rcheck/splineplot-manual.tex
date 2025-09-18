@@ -1,0 +1,178 @@
+\nonstopmode{}
+\documentclass[letterpaper]{book}
+\usepackage[times,inconsolata,hyper]{Rd}
+\usepackage{makeidx}
+\makeatletter\@ifl@t@r\fmtversion{2018/04/01}{}{\usepackage[utf8]{inputenc}}\makeatother
+% \usepackage{graphicx} % @USE GRAPHICX@
+\makeindex{}
+\begin{document}
+\chapter*{}
+\begin{center}
+{\textbf{\huge Package `splineplot'}}
+\par\bigskip{\large \today}
+\end{center}
+\ifthenelse{\boolean{Rd@use@hyper}}{\hypersetup{pdftitle = {splineplot: Visualization of Spline Effects in GAM and GLM Models}}}{}
+\ifthenelse{\boolean{Rd@use@hyper}}{\hypersetup{pdfauthor = {Jinseob Kim}}}{}
+\begin{description}
+\raggedright{}
+\item[Type]\AsIs{Package}
+\item[Title]\AsIs{Visualization of Spline Effects in GAM and GLM Models}
+\item[Version]\AsIs{0.1.0}
+\item[Author]\AsIs{Jinseob Kim [aut, cre]}
+\item[Maintainer]\AsIs{Jinseob Kim }\email{jinseob2kim@gmail.com}\AsIs{}
+\item[Description]\AsIs{Creates ggplot2-based visualizations of smooth effects from GAM models
+fitted with mgcv and spline effects from GLM models. Supports interaction terms
+and provides hazard ratio plots with histograms for survival analysis.}
+\item[License]\AsIs{Apache License (>= 2)}
+\item[Encoding]\AsIs{UTF-8}
+\item[LazyData]\AsIs{true}
+\item[Imports]\AsIs{ggplot2 (>= 3.0.0), mgcv, survival, stats, splines}
+\item[Suggests]\AsIs{testthat (>= 3.0.0), knitr, rmarkdown, covr, pkgdown}
+\item[RoxygenNote]\AsIs{7.3.2}
+\item[VignetteBuilder]\AsIs{knitr}
+\item[URL]\AsIs{}\url{https://github.com/jinseob2kim/splineplot}\AsIs{,
+}\url{https://jinseob2kim.github.io/splineplot/}\AsIs{}
+\item[BugReports]\AsIs{}\url{https://github.com/jinseob2kim/splineplot/issues}\AsIs{}
+\item[Config/testthat/edition]\AsIs{3}
+\end{description}
+\Rdcontents{Contents}
+\HeaderA{extract\_spline\_data}{Extract Spline Data}{extract.Rul.spline.Rul.data}
+%
+\begin{Description}
+Extract predictions and confidence intervals from fitted models
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+extract_spline_data(
+  fit,
+  data,
+  xvar,
+  refx,
+  model_info,
+  term_index = 1,
+  log_scale = FALSE,
+  ci_level = 0.95
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{fit}] Fitted model object
+
+\item[\code{data}] Data frame
+
+\item[\code{xvar}] Variable name
+
+\item[\code{refx}] Reference value
+
+\item[\code{model\_info}] Model information list
+
+\item[\code{term\_index}] Which smooth term to use (for multiple s() terms)
+
+\item[\code{log\_scale}] Whether to use log scale
+
+\item[\code{ci\_level}] Confidence level
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+Data frame with predictions
+\end{Value}
+\HeaderA{splineplot}{Spline Plot for GAM and GLM Models}{splineplot}
+%
+\begin{Description}
+Create ggplot2 visualizations of smooth or spline effects from GAM and GLM models.
+Supports Linear, Logistic, Poisson, and Cox models with interaction terms.
+Handles GAM smooth terms (s(), te(), ti()), GLM splines (ns(), bs()), and Cox pspline().
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+splineplot(
+  fit,
+  data,
+  xvar = NULL,
+  by_var = NULL,
+  refx = NULL,
+  term_index = 1,
+  bins = 12,
+  xlim = NULL,
+  ylim = NULL,
+  show_hist = NULL,
+  log_scale = FALSE,
+  ci_level = 0.95,
+  show_ref_point = TRUE,
+  colors = NULL,
+  ribbon_ci = FALSE,
+  xlab = NULL,
+  ylab = NULL,
+  ylab_right = "Percent of Population"
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{fit}] A fitted model object (gam, glm, lm, coxph)
+
+\item[\code{data}] The data frame used to fit the model
+
+\item[\code{xvar}] Character string specifying the variable name for x-axis (default: first spline term)
+
+\item[\code{by\_var}] Character string specifying the interaction variable (default: auto-detect from model)
+
+\item[\code{refx}] Reference value for the x variable (default: median)
+
+\item[\code{term\_index}] For GAM with multiple smooth terms, which term to plot (default: 1)
+
+\item[\code{bins}] Number of bins for histogram (default: 12)
+
+\item[\code{xlim}] X-axis limits (default: range of x variable)
+
+\item[\code{ylim}] Y-axis limits (default: auto-determined, e.g., c(0.25, 2.0) for HR/OR/RR)
+
+\item[\code{show\_hist}] Logical, whether to show histogram (default: TRUE)
+
+\item[\code{log\_scale}] Logical, whether to use log scale for OR/RR/HR (default: FALSE)
+
+\item[\code{ci\_level}] Confidence interval level (default: 0.95)
+
+\item[\code{show\_ref\_point}] Logical, whether to show reference point marker (default: TRUE)
+
+\item[\code{colors}] Named vector of colors for by\_var levels
+
+\item[\code{ribbon\_ci}] Logical, whether to use ribbon style for CI (default: FALSE, uses dotted lines)
+
+\item[\code{xlab}] Custom x-axis label (default: xvar name)
+
+\item[\code{ylab}] Custom y-axis label (default: auto-determined based on model type)
+
+\item[\code{ylab\_right}] Custom right y-axis label for histogram (default: "Percent of Population")
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A ggplot2 object
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+## Not run: 
+library(mgcv)
+library(survival)
+
+# GAM example with Cox
+fit <- gam(Surv(time, status) ~ s(age), family = cox.ph(), data = mydata)
+splineplot(fit, mydata, xvar = "age")
+
+# Logistic regression with spline
+fit2 <- glm(y ~ ns(age, 4), family = binomial, data = mydata)
+splineplot(fit2, mydata, xvar = "age", log_scale = TRUE)
+
+## End(Not run)
+\end{ExampleCode}
+\end{Examples}
+\printindex{}
+\end{document}

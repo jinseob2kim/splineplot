@@ -3,7 +3,7 @@
 .RData
 *.Rproj
 inst/doc
-docs/
+# docs/
 .DS_Store
 *.png
 *.pdf
