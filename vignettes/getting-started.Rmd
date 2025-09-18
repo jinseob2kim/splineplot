@@ -1,0 +1,225 @@
+---
+title: "Getting Started with splineplot"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with splineplot}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5,
+  dpi = 100
+)
+```
+
+```{r setup}
+library(splineplot)
+library(mgcv)
+library(survival)
+library(splines)
+library(ggplot2)
+```
+
+## Introduction
+
+The `splineplot` package provides a unified interface for visualizing spline effects from various regression models. This vignette will guide you through the basic usage of the package.
+
+## Preparing Your Data
+
+First, let's create some sample data to work with:
+
+```{r data}
+set.seed(42)
+n <- 500
+
+# Continuous predictor
+age <- rnorm(n, mean = 50, sd = 10)
+
+# Non-linear effect
+true_effect <- -0.05*(age - 50) + 0.001*(age - 50)^3/100
+
+# Various outcomes
+time_to_event <- rexp(n, rate = exp(true_effect))
+event_status <- rbinom(n, 1, 0.8)
+binary_outcome <- rbinom(n, 1, plogis(true_effect))
+count_outcome <- rpois(n, lambda = exp(true_effect/2))
+continuous_outcome <- true_effect + rnorm(n, 0, 0.5)
+
+# Create data frame
+data <- data.frame(
+  age = age,
+  time = time_to_event,
+  status = event_status,
+  binary = binary_outcome,
+  count = count_outcome,
+  continuous = continuous_outcome
+)
+```
+
+## GAM Models
+
+### Cox Proportional Hazards
+
+GAM with Cox family is useful for flexible modeling of survival data:
+
+```{r gam-cox}
+# Fit GAM Cox model using weights
+gam_cox <- gam(time ~ s(age),
+               family = cox.ph(),
+               weights = status,
+               data = data)
+
+# Create spline plot
+splineplot(gam_cox, data,
+          ylim = c(0.5, 2.0),
+          xlab = "Age (years)",
+          ylab = "Hazard Ratio")
+```
+
+The plot shows:
+- The smooth effect of age on hazard
+- 95% confidence intervals (dotted lines)
+- A reference point (diamond) where HR = 1
+- Histogram showing the distribution of data
+
+### Logistic Regression
+
+For binary outcomes:
+
+```{r gam-logistic}
+gam_logit <- gam(binary ~ s(age),
+                 family = binomial(),
+                 data = data)
+
+splineplot(gam_logit, data,
+          ylim = c(0.5, 2.0),
+          ylab = "Odds Ratio")
+```
+
+### Poisson Regression
+
+For count data:
+
+```{r gam-poisson}
+gam_poisson <- gam(count ~ s(age),
+                   family = poisson(),
+                   data = data)
+
+splineplot(gam_poisson, data,
+          ylab = "Rate Ratio")
+```
+
+## GLM with Splines
+
+When you prefer parametric splines over GAM smooths:
+
+### Natural Splines (ns)
+
+```{r glm-ns}
+glm_ns <- glm(binary ~ ns(age, df = 4),
+              family = binomial(),
+              data = data)
+
+splineplot(glm_ns, data,
+          ylim = c(0.5, 2.0))
+```
+
+### B-splines (bs)
+
+```{r glm-bs}
+glm_bs <- glm(count ~ bs(age, df = 4),
+              family = poisson(),
+              data = data)
+
+splineplot(glm_bs, data)
+```
+
+## Cox Models with Splines
+
+For survival analysis without GAM:
+
+```{r cox-ns}
+cox_ns <- coxph(Surv(time, status) ~ ns(age, df = 4),
+                data = data)
+
+splineplot(cox_ns, data,
+          ylim = c(0.5, 2.0))
+```
+
+## Customizing Your Plots
+
+### Reference Values
+
+By default, the reference value is the median. You can change this:
+
+```{r custom-ref}
+splineplot(gam_cox, data,
+          refx = 45,  # Set reference at age 45
+          ylim = c(0.5, 2.0))
+```
+
+### Confidence Interval Styles
+
+Choose between dotted lines (default) or ribbon style:
+
+```{r ci-styles}
+# Ribbon style confidence intervals
+splineplot(gam_logit, data,
+          ribbon_ci = TRUE,
+          ylim = c(0.5, 2.0))
+```
+
+### Histogram Options
+
+You can toggle the histogram display:
+
+```{r histogram}
+splineplot(gam_cox, data,
+          show_hist = FALSE,
+          ylim = c(0.5, 2.0))
+```
+
+### Log Scale
+
+For odds ratios, rate ratios, or hazard ratios, you might prefer log scale:
+
+```{r log-scale}
+splineplot(gam_logit, data,
+          log_scale = TRUE)
+```
+
+## Interaction Terms
+
+The package automatically detects and visualizes interaction terms:
+
+```{r interaction}
+# Add a grouping variable
+data$group <- factor(sample(c("Male", "Female"), n, replace = TRUE))
+
+# Fit model with interaction
+gam_interact <- gam(time ~ s(age, by = group),
+                   family = cox.ph(),
+                   weights = status,
+                   data = data)
+
+# Plot shows separate curves for each group
+splineplot(gam_interact, data,
+          ylim = c(0.5, 2.0))
+```
+
+## Tips for Best Results
+
+1. **Model Choice**: Use GAM for maximum flexibility, GLM with splines for parametric approach
+2. **Degrees of Freedom**: Higher df allows more flexibility but may overfit
+3. **Reference Point**: Choose a meaningful reference value for interpretation
+4. **Confidence Intervals**: Ribbon style is visually appealing, dotted lines show precision better
+5. **Sample Size**: Ensure adequate sample size for stable spline estimates
+
+## Conclusion
+
+The `splineplot` package simplifies the visualization of non-linear effects across different model types. It handles the complexity of extracting and transforming model predictions while providing a consistent, publication-ready output.

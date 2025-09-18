@@ -1,0 +1,11 @@
+.Rproj.user
+.Rhistory
+.RData
+*.Rproj
+inst/doc
+docs/
+.DS_Store
+*.png
+*.pdf
+tests/*.R
+!tests/testthat/*.R

@@ -1,0 +1,15 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^README-.*\.png$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.travis\.yml$
+^codecov\.yml$
+^\.DS_Store$
+^tests/test.*\.R$
+^tests/debug.*\.R$
+^tests/.*\.png$
+^man/figures/README-.*\.png$
