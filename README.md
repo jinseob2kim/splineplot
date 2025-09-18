@@ -42,7 +42,13 @@ Linear, Logistic, Poisson, and Cox proportional hazards models.
 
 ## Installation
 
-You can install the development version of splineplot from GitHub:
+You can install the released version of splineplot from CRAN:
+
+``` r
+install.packages("splineplot")
+```
+
+Or install the development version from GitHub:
 
 ``` r
 # install.packages("devtools")
@@ -264,8 +270,8 @@ like to change.
 
 ## License
 
-Apache License 2.0 © Jinseob Kim / Zarathu - see the
-[LICENSE](LICENSE.md) file for details.
+Apache License 2.0 © Jinseob Kim / Zarathu - see the LICENSE file for
+details.
 
 ## Acknowledgments
 

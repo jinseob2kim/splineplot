@@ -44,7 +44,13 @@ The **splineplot** package provides a unified interface for visualizing spline e
 
 ## Installation
 
-You can install the development version of splineplot from GitHub:
+You can install the released version of splineplot from CRAN:
+
+```{r eval=FALSE}
+install.packages("splineplot")
+```
+
+Or install the development version from GitHub:
 
 ```{r eval=FALSE}
 # install.packages("devtools")
@@ -191,7 +197,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ## License
 
-Apache License 2.0 © Jinseob Kim / Zarathu - see the [LICENSE](LICENSE.md) file for details.
+Apache License 2.0 © Jinseob Kim / Zarathu - see the LICENSE file for details.
 
 ## Acknowledgments
 
