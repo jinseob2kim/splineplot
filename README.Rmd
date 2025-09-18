@@ -20,7 +20,12 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/jinseob2kim/splineplot/workflows/R-CMD-check/badge.svg)](https://github.com/jinseob2kim/splineplot/actions)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/splineplot)](https://cran.r-project.org/package=splineplot)
+[![CRAN_Download_Badge](https://cranlogs.r-pkg.org/badges/splineplot)](https://CRAN.R-project.org/package=splineplot)
 [![Codecov test coverage](https://codecov.io/gh/jinseob2kim/splineplot/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jinseob2kim/splineplot?branch=main)
+[![GitHub issues](https://img.shields.io/github/issues/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/issues)
+[![GitHub stars](https://img.shields.io/github/stars/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/stargazers)
+[![GitHub license](https://img.shields.io/github/license/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/blob/main/LICENSE)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
