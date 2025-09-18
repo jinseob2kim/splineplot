@@ -7,7 +7,7 @@
 
 [![R-CMD-check](https://github.com/jinseob2kim/splineplot/workflows/R-CMD-check/badge.svg)](https://github.com/jinseob2kim/splineplot/actions)
 [![Codecov test
-coverage](https://codecov.io/gh/jinseob2kim/splineplot/branch/main/graph/badge.svg)](https://codecov.io/gh/jinseob2kim/splineplot?branch=main)
+coverage](https://codecov.io/gh/jinseob2kim/splineplot/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jinseob2kim/splineplot?branch=main)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
@@ -247,8 +247,6 @@ citation("splineplot")
   site](https://jinseob2kim.github.io/splineplot/)
 - **Bug reports**: [GitHub
   Issues](https://github.com/jinseob2kim/splineplot/issues)
-- **Questions**: [GitHub
-  Discussions](https://github.com/jinseob2kim/splineplot/discussions)
 
 ## Contributing
 

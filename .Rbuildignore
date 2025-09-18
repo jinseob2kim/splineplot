@@ -14,3 +14,4 @@
 ^tests/.*\.png$
 ^man/figures/README-.*\.png$
 ^CRAN-SUBMISSION$
+^cran-comments\.md$
