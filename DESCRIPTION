@@ -8,7 +8,7 @@ Authors@R: c(person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c(
 Description: Creates 'ggplot2'-based visualizations of smooth effects from GAM models
     fitted with 'mgcv' and spline effects from GLM models. Supports interaction terms
     and provides hazard ratio plots with histograms for survival analysis.
-License: Apache License 2.0
+License: Apache License 2.0 | file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports:
