@@ -5,7 +5,8 @@
 inst/doc
 # docs/
 .DS_Store
-*.png
+# *.png
+!man/figures/*.png
 *.pdf
 tests/*.R
 !tests/testthat/*.R
