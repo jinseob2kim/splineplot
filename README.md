@@ -38,7 +38,7 @@ You can install the development version of splineplot from GitHub:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("yourusername/splineplot")
+devtools::install_github("jinseob2kim/splineplot")
 ```
 
 ## Basic Usage
