@@ -14,11 +14,11 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     ggplot2 (>= 3.0.0),
+    stats
+Suggests:
     mgcv,
     survival,
-    stats,
-    splines
-Suggests:
+    splines,
     testthat (>= 3.0.0),
     knitr,
     rmarkdown,

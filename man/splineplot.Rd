@@ -71,16 +71,35 @@ Supports Linear, Logistic, Poisson, and Cox models with interaction terms.
 Handles GAM smooth terms (s(), te(), ti()), GLM splines (ns(), bs()), and Cox pspline().
 }
 \examples{
-\dontrun{
-library(mgcv)
-library(survival)
+# Create sample data
+set.seed(123)
+n <- 200
+x <- rnorm(n, mean = 50, sd = 10)
+lp <- -0.05*(x - 50) + 0.001*(x - 50)^2
+y <- rbinom(n, 1, plogis(lp))
+dat <- data.frame(x = x, y = y)
 
-# GAM example with Cox
-fit <- gam(Surv(time, status) ~ s(age), family = cox.ph(), data = mydata)
-splineplot(fit, mydata, xvar = "age")
+# GLM with natural splines
+library(splines)
+fit_glm <- glm(y ~ ns(x, df = 4), family = binomial(), data = dat)
+p <- splineplot(fit_glm, dat)
 
-# Logistic regression with spline
-fit2 <- glm(y ~ ns(age, 4), family = binomial, data = mydata)
-splineplot(fit2, mydata, xvar = "age", log_scale = TRUE)
+\donttest{
+# GAM example (requires mgcv)
+if (requireNamespace("mgcv", quietly = TRUE)) {
+  fit_gam <- mgcv::gam(y ~ s(x), family = binomial(), data = dat)
+  p2 <- splineplot(fit_gam, dat)
+}
+
+# Cox model example (requires survival)
+if (requireNamespace("survival", quietly = TRUE)) {
+  time <- rexp(n, rate = exp(lp/2))
+  status <- rbinom(n, 1, 0.8)
+  dat$time <- time
+  dat$status <- status
+  fit_cox <- survival::coxph(survival::Surv(time, status) ~ ns(x, df = 4),
+                              data = dat)
+  p3 <- splineplot(fit_cox, dat)
+}
 }
 }

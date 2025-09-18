@@ -1,8 +1,19 @@
+# Global variables used in ggplot2 aes() calls
+utils::globalVariables(c("x", "y", "group", "lcl", "ucl", "xmin", "xmax", "ymin", "ymax"))
+
 #' Spline Plot for GAM and GLM Models
 #'
 #' Create ggplot2 visualizations of smooth or spline effects from GAM and GLM models.
 #' Supports Linear, Logistic, Poisson, and Cox models with interaction terms.
 #' Handles GAM smooth terms (s(), te(), ti()), GLM splines (ns(), bs()), and Cox pspline().
+#'
+#' @importFrom ggplot2 ggplot aes geom_line geom_ribbon geom_rect geom_hline
+#' @importFrom ggplot2 annotate coord_cartesian scale_x_continuous scale_y_continuous
+#' @importFrom ggplot2 labs theme theme_bw element_blank element_line element_text
+#' @importFrom ggplot2 margin sec_axis scale_color_manual scale_fill_manual
+#' @importFrom stats coef vcov predict median qnorm setNames terms model.matrix delete.response
+#' @importFrom graphics hist
+#' @importFrom utils head tail
 #'
 #' @param fit A fitted model object (gam, glm, lm, coxph)
 #' @param data The data frame used to fit the model
@@ -27,17 +38,36 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' library(mgcv)
-#' library(survival)
+#' # Create sample data
+#' set.seed(123)
+#' n <- 200
+#' x <- rnorm(n, mean = 50, sd = 10)
+#' lp <- -0.05*(x - 50) + 0.001*(x - 50)^2
+#' y <- rbinom(n, 1, plogis(lp))
+#' dat <- data.frame(x = x, y = y)
 #'
-#' # GAM example with Cox
-#' fit <- gam(Surv(time, status) ~ s(age), family = cox.ph(), data = mydata)
-#' splineplot(fit, mydata, xvar = "age")
+#' # GLM with natural splines
+#' library(splines)
+#' fit_glm <- glm(y ~ ns(x, df = 4), family = binomial(), data = dat)
+#' p <- splineplot(fit_glm, dat)
 #'
-#' # Logistic regression with spline
-#' fit2 <- glm(y ~ ns(age, 4), family = binomial, data = mydata)
-#' splineplot(fit2, mydata, xvar = "age", log_scale = TRUE)
+#' \donttest{
+#' # GAM example (requires mgcv)
+#' if (requireNamespace("mgcv", quietly = TRUE)) {
+#'   fit_gam <- mgcv::gam(y ~ s(x), family = binomial(), data = dat)
+#'   p2 <- splineplot(fit_gam, dat)
+#' }
+#'
+#' # Cox model example (requires survival)
+#' if (requireNamespace("survival", quietly = TRUE)) {
+#'   time <- rexp(n, rate = exp(lp/2))
+#'   status <- rbinom(n, 1, 0.8)
+#'   dat$time <- time
+#'   dat$status <- status
+#'   fit_cox <- survival::coxph(survival::Surv(time, status) ~ ns(x, df = 4),
+#'                               data = dat)
+#'   p3 <- splineplot(fit_cox, dat)
+#' }
 #' }
 splineplot <- function(fit, data, xvar = NULL, by_var = NULL, refx = NULL,
                       term_index = 1, bins = 12,
@@ -291,6 +321,25 @@ detect_spline_terms <- function(fit, model_info = NULL, xvar = NULL, by_var = NU
 #'
 #' @return Data frame with predictions
 #' @export
+#'
+#' @examples
+#' # Create sample data
+#' set.seed(123)
+#' n <- 100
+#' x <- rnorm(n, mean = 50, sd = 10)
+#' y <- rbinom(n, 1, plogis(-0.05*(x - 50)))
+#' dat <- data.frame(x = x, y = y)
+#'
+#' # Fit GLM with splines
+#' library(splines)
+#' fit <- glm(y ~ ns(x, df = 4), family = binomial(), data = dat)
+#'
+#' # Extract spline data
+#' model_info <- list(type = "glm", family = "binomial", ylabel = "Odds Ratio")
+#' df <- extract_spline_data(fit, dat, "x", refx = 50, model_info,
+#'                           log_scale = FALSE, ci_level = 0.95)
+#' head(df)
+#'
 extract_spline_data <- function(fit, data, xvar, refx,
                                model_info, term_index = 1,
                                log_scale = FALSE, ci_level = 0.95) {

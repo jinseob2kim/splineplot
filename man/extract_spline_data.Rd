@@ -38,3 +38,22 @@ Data frame with predictions
 \description{
 Extract predictions and confidence intervals from fitted models
 }
+\examples{
+# Create sample data
+set.seed(123)
+n <- 100
+x <- rnorm(n, mean = 50, sd = 10)
+y <- rbinom(n, 1, plogis(-0.05*(x - 50)))
+dat <- data.frame(x = x, y = y)
+
+# Fit GLM with splines
+library(splines)
+fit <- glm(y ~ ns(x, df = 4), family = binomial(), data = dat)
+
+# Extract spline data
+model_info <- list(type = "glm", family = "binomial", ylabel = "Odds Ratio")
+df <- extract_spline_data(fit, dat, "x", refx = 50, model_info,
+                          log_scale = FALSE, ci_level = 0.95)
+head(df)
+
+}
