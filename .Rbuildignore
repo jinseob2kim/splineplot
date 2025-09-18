@@ -13,3 +13,4 @@
 ^tests/debug.*\.R$
 ^tests/.*\.png$
 ^man/figures/README-.*\.png$
+^CRAN-SUBMISSION$
