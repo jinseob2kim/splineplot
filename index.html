@@ -24,7 +24,7 @@ with automatic detection of model types and customizable aesthetics.">
 
     <a class="navbar-brand me-2" href="index.html">splineplot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,7 +55,7 @@ with automatic detection of model types and customizable aesthetics.">
 </nav><div class="container template-home">
 <div class="row">
   <main id="main" class="col-md-9"><div class="section level1">
-<div class="page-header"><h1 id="splineplot-">splineplot <img src="reference/figures/logo.png" align="right" height="139"><a class="anchor" aria-label="anchor" href="#splineplot-"></a>
+<div class="page-header"><h1 id="splineplot">splineplot<a class="anchor" aria-label="anchor" href="#splineplot"></a>
 </h1></div>
 <!-- badges: start -->
 
@@ -78,15 +78,18 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of splineplot from GitHub:</p>
+<p>You can install the released version of splineplot from CRAN:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"splineplot"</span><span class="op">)</span></span></code></pre></div>
+<p>Or install the development version from GitHub:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
 <span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"jinseob2kim/splineplot"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="basic-usage">Basic Usage<a class="anchor" aria-label="anchor" href="#basic-usage"></a>
 </h2>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/jinseob2kim/splineplot" class="external-link">splineplot</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">mgcv</span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/therneau/survival" class="external-link">survival</a></span><span class="op">)</span></span>
@@ -106,7 +109,7 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="section level3">
 <h3 id="gam-with-cox-family">GAM with Cox family<a class="anchor" aria-label="anchor" href="#gam-with-cox-family"></a>
 </h3>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit GAM Cox model</span></span>
 <span><span class="va">fit_gam_cox</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span><span class="va">time</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span>,</span>
 <span>                   family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/coxph.html" class="external-link">cox.ph</a></span><span class="op">(</span><span class="op">)</span>, weights <span class="op">=</span> <span class="va">status</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
@@ -131,7 +134,7 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="section level3">
 <h3 id="logistic-regression-with-natural-splines">Logistic regression with natural splines<a class="anchor" aria-label="anchor" href="#logistic-regression-with-natural-splines"></a>
 </h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit logistic model with natural splines</span></span>
 <span><span class="va">fit_glm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">binary_y</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/splines/ns.html" class="external-link">ns</a></span><span class="op">(</span><span class="va">x</span>, df <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
 <span>               family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/stats/family.html" class="external-link">binomial</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
@@ -155,13 +158,15 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="section level3">
 <h3 id="gam-with-interaction-terms">GAM with interaction terms<a class="anchor" aria-label="anchor" href="#gam-with-interaction-terms"></a>
 </h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Add a grouping variable</span></span>
 <span><span class="va">dat</span><span class="op">$</span><span class="va">group</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>, <span class="va">n</span>, replace <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Fit model with interaction</span></span>
-<span><span class="va">fit_interaction</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">status</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">x</span>, by <span class="op">=</span> <span class="va">group</span><span class="op">)</span>,</span>
-<span>                      family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/coxph.html" class="external-link">cox.ph</a></span><span class="op">(</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
+<span><span class="va">fit_interaction</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/gam.html" class="external-link">gam</a></span><span class="op">(</span><span class="va">time</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/s.html" class="external-link">s</a></span><span class="op">(</span><span class="va">x</span>, by <span class="op">=</span> <span class="va">group</span><span class="op">)</span>,</span>
+<span>                      family <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/mgcv/man/coxph.html" class="external-link">cox.ph</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>                      weights <span class="op">=</span> <span class="va">status</span>,</span>
+<span>                      data <span class="op">=</span> <span class="va">dat</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Plot with interaction</span></span>
 <span><span class="fu"><a href="reference/splineplot.html">splineplot</a></span><span class="op">(</span><span class="va">fit_interaction</span>, <span class="va">dat</span>,</span>
@@ -173,11 +178,11 @@ with automatic detection of model types and customizable aesthetics.">
 <span><span class="co">#&gt; data's fill values.</span></span>
 <span><span class="co">#&gt; Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_rect()`).</span></span>
-<span><span class="co">#&gt; Warning: Removed 139 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; Warning: Removed 136 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
 <span><span class="co">#&gt; Warning: Removed 116 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
-<span><span class="co">#&gt; Warning: Removed 128 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; Warning: Removed 126 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre></div>
 <p><img src="reference/figures/README-gam-interaction-1.png" width="100%"></p>
 </div>
@@ -188,7 +193,7 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="section level3">
 <h3 id="customizing-confidence-intervals">Customizing confidence intervals<a class="anchor" aria-label="anchor" href="#customizing-confidence-intervals"></a>
 </h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Default: dotted lines</span></span>
 <span><span class="fu"><a href="reference/splineplot.html">splineplot</a></span><span class="op">(</span><span class="va">fit_gam_cox</span>, <span class="va">dat</span>, ribbon_ci <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
@@ -198,7 +203,7 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="section level3">
 <h3 id="log-scale-for-oddsratehazard-ratios">Log scale for odds/rate/hazard ratios<a class="anchor" aria-label="anchor" href="#log-scale-for-oddsratehazard-ratios"></a>
 </h3>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use log scale for y-axis</span></span>
 <span><span class="fu"><a href="reference/splineplot.html">splineplot</a></span><span class="op">(</span><span class="va">fit_glm</span>, <span class="va">dat</span>, log_scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Using 'x' as x variable</span></span>
@@ -220,7 +225,7 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="section level3">
 <h3 id="custom-reference-values">Custom reference values<a class="anchor" aria-label="anchor" href="#custom-reference-values"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set custom reference point (default is median)</span></span>
 <span><span class="fu"><a href="reference/splineplot.html">splineplot</a></span><span class="op">(</span><span class="va">fit_gam_cox</span>, <span class="va">dat</span>,</span>
 <span>          refx <span class="op">=</span> <span class="fl">40</span>,  <span class="co"># Reference at x = 40</span></span>
@@ -379,7 +384,7 @@ with automatic detection of model types and customizable aesthetics.">
 <h2 id="citation">Citation<a class="anchor" aria-label="anchor" href="#citation"></a>
 </h2>
 <p>If you use splineplot in your research, please cite:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/citation.html" class="external-link">citation</a></span><span class="op">(</span><span class="st">"splineplot"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -392,9 +397,6 @@ with automatic detection of model types and customizable aesthetics.">
 <li>
 <strong>Bug reports</strong>: <a href="https://github.com/jinseob2kim/splineplot/issues" class="external-link">GitHub Issues</a>
 </li>
-<li>
-<strong>Questions</strong>: <a href="https://github.com/jinseob2kim/splineplot/discussions" class="external-link">GitHub Discussions</a>
-</li>
 </ul>
 </div>
 <div class="section level2">
@@ -405,7 +407,7 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>Apache License 2.0 © Jinseob Kim / Zarathu - see the <a href="LICENSE.html">LICENSE</a> file for details.</p>
+<p>Apache License 2.0 © Jinseob Kim / Zarathu - see the LICENSE file for details.</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
@@ -424,8 +426,8 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="LICENSE.html">Full license</a></li>
-<li><small>Apache License (&gt;= 2)</small></li>
+<li>Apache License 2.0 | file <a href="LICENSE-text.html">LICENSE</a>
+</li>
 </ul>
 </div>
 
