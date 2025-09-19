@@ -23,9 +23,11 @@ test_that("splineplot works with GAM Cox models", {
   p2 <- splineplot(fit, dat, refx = 35, ylim = c(0.5, 2.0))
   expect_s3_class(p2, "ggplot")
 
-  # Test with Surv() method
-  fit2 <- mgcv::gam(survival::Surv(time, status) ~ s(x),
-                     family = mgcv::cox.ph(), data = dat)
+  # Test with weights method (preferred for GAM Cox)
+  fit2 <- mgcv::gam(time ~ s(x),
+                     family = mgcv::cox.ph(),
+                     weights = status,
+                     data = dat)
   p3 <- splineplot(fit2, dat)
   expect_s3_class(p3, "ggplot")
 })

@@ -539,7 +539,12 @@ extract_spline_interaction <- function(fit, data, xvar, by_var, refx,
     gx <- seq(min(xv, na.rm = TRUE), max(xv, na.rm = TRUE), length.out = 200)
     nd <- data.frame(x = gx)
     names(nd) <- xvar
-    nd[[by_var]] <- level
+    # Ensure by_var is factor with correct levels
+    if (is.factor(data[[by_var]])) {
+      nd[[by_var]] <- factor(rep(level, length(gx)), levels = levels(data[[by_var]]))
+    } else {
+      nd[[by_var]] <- level
+    }
 
     # Add other variables
     for (var in names(data)) {
@@ -547,7 +552,7 @@ extract_spline_interaction <- function(fit, data, xvar, by_var, refx,
         if (is.numeric(data[[var]])) {
           nd[[var]] <- median(data[[var]], na.rm = TRUE)
         } else if (is.factor(data[[var]])) {
-          nd[[var]] <- levels(data[[var]])[1]
+          nd[[var]] <- factor(levels(data[[var]])[1], levels = levels(data[[var]]))
         } else {
           nd[[var]] <- data[[var]][1]
         }
@@ -942,47 +947,67 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
     df_curve_plot <- df_curve[df_curve$x >= xlim[1] & df_curve$x <= xlim[2], ]
   }
 
+  # Always define axis limits for consistency
+  left_min <- ylim[1]
+  left_max <- ylim[2]
+
+  # Scale mapping for dual axes (only needed for histogram)
+  to_left <- function(pct) left_min + pct/100 * (left_max - left_min)
+  from_left <- function(y) 100 * (y - left_min)/(left_max - left_min)
+
+  # X-axis position - always use gap for clean separation
+  gap_size <- (left_max - left_min) * 0.03
+  if (show_hist) {
+    # Use floating X-axis when histogram is shown
+    x_axis_y <- left_min - gap_size
+  } else {
+    # Small gap even without histogram to separate axes
+    x_axis_y <- left_min - gap_size
+  }
+
   # Build plot
-  p <- ggplot(df_curve_plot, aes(x = x, group = group, color = group))
+  p <- ggplot()
 
   # Add histogram if requested for interaction plots
   if (show_hist) {
     xv <- data[[xvar]]
     h <- hist(xv, breaks = bins, plot = FALSE, include.lowest = TRUE, right = FALSE)
-
-    # Scale histogram to fit in bottom 20% of plot
-    hist_max <- max(h$counts)
-    hist_scale <- diff(ylim) * 0.2 / hist_max
-    hist_base <- ylim[1]
+    pct <- 100 * h$counts / sum(h$counts)
 
     df_hist <- data.frame(
       xmin = head(h$breaks, -1),
       xmax = tail(h$breaks, -1),
-      ymax = hist_base + h$counts * hist_scale,
-      ymin = rep(hist_base, length(h$counts))
+      y = to_left(pct)
     )
 
+    # Filter histogram bars to xlim if specified
+    if (!is.null(xlim)) {
+      df_hist <- df_hist[df_hist$xmax >= xlim[1] & df_hist$xmin <= xlim[2], ]
+      df_hist$xmin <- pmax(df_hist$xmin, xlim[1])
+      df_hist$xmax <- pmin(df_hist$xmax, xlim[2])
+    }
+
     p <- p + geom_rect(data = df_hist,
-                      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
+                      aes(xmin = xmin, xmax = xmax, ymin = x_axis_y, ymax = y),
                       fill = "grey80", color = "grey60", linewidth = 0.3,
-                      alpha = 0.85, inherit.aes = FALSE)
+                      alpha = 0.85)
   }
 
   # Add confidence intervals based on ribbon_ci option
   if (ribbon_ci) {
     p <- p +
       # Ribbon style confidence intervals
-      geom_ribbon(aes(ymin = lcl, ymax = ucl, fill = group),
+      geom_ribbon(data = df_curve_plot, aes(x = x, ymin = lcl, ymax = ucl, fill = group, group = group),
                  alpha = 0.2, color = NA) +
       # Main curves
-      geom_line(aes(y = y), linewidth = 1.2)
+      geom_line(data = df_curve_plot, aes(x = x, y = y, group = group, color = group), linewidth = 1.2)
   } else {
     p <- p +
       # Dotted line style confidence intervals (default)
-      geom_line(aes(x = x, y = lcl, group = group, color = group), linetype = "dotted") +
-      geom_line(aes(x = x, y = ucl, group = group, color = group), linetype = "dotted") +
+      geom_line(data = df_curve_plot, aes(x = x, y = lcl, group = group, color = group), linetype = "dotted") +
+      geom_line(data = df_curve_plot, aes(x = x, y = ucl, group = group, color = group), linetype = "dotted") +
       # Main curves
-      geom_line(aes(y = y), linewidth = 1.2)
+      geom_line(data = df_curve_plot, aes(x = x, y = y, group = group, color = group), linewidth = 1.2)
   }
 
   # Add reference line and points
@@ -1028,43 +1053,100 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
 
   axis_lwd <- 0.5
 
+  # Define y_breaks for manual ticks
+  if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
+    # For ratio scales - create nice breaks
+    if (ylim[2] <= 2) {
+      y_breaks <- seq(ylim[1], ylim[2], by = 0.25)
+    } else if (ylim[2] <= 5) {
+      y_breaks <- seq(ylim[1], ylim[2], by = 0.5)
+    } else if (ylim[2] <= 10) {
+      y_breaks <- seq(ceiling(ylim[1]), floor(ylim[2]), by = 1)
+    } else {
+      y_breaks <- pretty(ylim, n = 5)
+    }
+    # Remove breaks outside ylim
+    y_breaks <- y_breaks[y_breaks >= ylim[1] & y_breaks <= ylim[2]]
+  } else {
+    # For effect/log scales
+    y_breaks <- pretty(ylim, n = 5)
+  }
+
+  # Adjust ylim to include floating X-axis
+  plot_ylim <- c(x_axis_y - 0.05, left_max)
+
   p <- p +
-    coord_cartesian(xlim = c(x_min, x_max), ylim = ylim, clip = "off") +
+    coord_cartesian(xlim = c(x_min, x_max),
+                   ylim = plot_ylim,
+                   clip = "off") +
     scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
-    scale_y_continuous(limits = ylim, name = ylabel) +
-    labs(x = if (!is.null(xlab)) xlab else xvar) +
+    labs(x = if (!is.null(xlab)) xlab else xvar)
+
+  # Y-axis settings with secondary axis for histogram
+  if (show_hist) {
+    p <- p + scale_y_continuous(
+      limits = plot_ylim,
+      breaks = y_breaks,
+      labels = function(x) ifelse(x >= left_min, format(x, nsmall = 2), ""),
+      name = ylabel,
+      expand = c(0, 0),
+      sec.axis = sec_axis(~ from_left(.), name = ylab_right)
+    )
+  } else {
+    p <- p + scale_y_continuous(
+      limits = plot_ylim,
+      breaks = y_breaks,
+      labels = function(x) ifelse(x >= left_min, format(x, nsmall = 2), ""),
+      name = ylabel,
+      expand = c(0, 0)
+    )
+  }
+
+  p <- p +
     theme_bw(base_size = 13) +
     theme(
       panel.grid = element_blank(),
       panel.border = element_blank(),
       axis.line = element_blank(),
-      axis.ticks = element_line(colour = "black", linewidth = axis_lwd),  # Show auto ticks
+      axis.ticks.x = element_blank(),  # X축 틱 숨김
+      axis.ticks.y = element_line(colour = "black", linewidth = axis_lwd),  # Y축 틱 자동
       axis.text = element_text(face = "bold"),
       axis.title = element_text(face = "bold"),
-      legend.position = "right"
+      axis.title.x = element_text(margin = margin(t = 15)),
+      legend.position = "right",
+      plot.margin = margin(t = 10, r = 10, b = 20, l = 10)
     )
 
   # Manual axis drawing for interaction plots
 
-  # X-axis at bottom
   p <- p + annotate("segment",
                    x = x_min, xend = x_max,
-                   y = ylim[1], yend = ylim[1],
+                   y = x_axis_y, yend = x_axis_y,
                    colour = "black", linewidth = axis_lwd)
 
   # Y-axis left
   p <- p + annotate("segment",
                    x = x_min, xend = x_min,
-                   y = ylim[1], yend = ylim[2],
+                   y = left_min, yend = left_max,
                    colour = "black", linewidth = axis_lwd)
 
   # Y-axis right
   p <- p + annotate("segment",
                    x = x_max, xend = x_max,
-                   y = ylim[1], yend = ylim[2],
+                   y = left_min, yend = left_max,
                    colour = "black", linewidth = axis_lwd)
 
-  # No manual ticks for interaction plots - let ggplot handle them
+  # Manual X-axis ticks only (Y축 틱은 theme에서 자동으로 처리)
+  x_breaks <- pretty(c(x_min, x_max), n = 5)
+  x_breaks <- x_breaks[x_breaks >= x_min & x_breaks <= x_max]
+  tick_len <- (left_max - left_min) * 0.02
+
+  for(xb in x_breaks) {
+    p <- p + annotate("segment",
+                     x = xb, xend = xb,
+                     y = x_axis_y, yend = x_axis_y - tick_len,
+                     colour = "black", linewidth = axis_lwd)
+  }
 
   return(p)
 }

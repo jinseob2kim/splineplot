@@ -1,3 +1,17 @@
+# splineplot 0.1.1
+
+## Bug Fixes
+* Fixed Y-axis tick marks display issue in interaction plots
+* Fixed tick marks protruding from axes when histogram is shown
+* Corrected secondary Y-axis scale for "Percent of Population" in interaction plots
+* Fixed X-axis positioning with floating axis for histogram display
+* Improved axis tick alignment for both single and interaction plots
+
+## Documentation
+* Updated GAM survival examples to use recommended `weights` parameter format
+* Removed unnecessary logo reference from README
+* Clarified that GAM Cox models should use `time ~ s(predictor), weights = status` format
+
 # splineplot 0.1.0
 
 ## Initial Release

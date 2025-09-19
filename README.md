@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# splineplot <img src="man/figures/logo.png" align="right" height="139" />
+# splineplot
 
 <!-- badges: start -->
 
@@ -134,8 +134,10 @@ splineplot(fit_glm, dat,
 dat$group <- factor(sample(c("A", "B"), n, replace = TRUE))
 
 # Fit model with interaction
-fit_interaction <- gam(Surv(time, status) ~ s(x, by = group),
-                      family = cox.ph(), data = dat)
+fit_interaction <- gam(time ~ s(x, by = group),
+                      family = cox.ph(),
+                      weights = status,
+                      data = dat)
 
 # Plot with interaction
 splineplot(fit_interaction, dat,
@@ -147,11 +149,11 @@ splineplot(fit_interaction, dat,
 #> data's fill values.
 #> Warning: Removed 2 rows containing missing values or values outside the scale range
 #> (`geom_rect()`).
-#> Warning: Removed 139 rows containing missing values or values outside the scale range
+#> Warning: Removed 136 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 #> Warning: Removed 116 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
-#> Warning: Removed 128 rows containing missing values or values outside the scale range
+#> Warning: Removed 126 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 ```
 

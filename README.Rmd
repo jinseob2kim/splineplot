@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# splineplot <img src="man/figures/logo.png" align="right" height="139" />
+# splineplot
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/jinseob2kim/splineplot/workflows/R-CMD-check/badge.svg)](https://github.com/jinseob2kim/splineplot/actions)
@@ -112,8 +112,10 @@ splineplot(fit_glm, dat,
 dat$group <- factor(sample(c("A", "B"), n, replace = TRUE))
 
 # Fit model with interaction
-fit_interaction <- gam(Surv(time, status) ~ s(x, by = group),
-                      family = cox.ph(), data = dat)
+fit_interaction <- gam(time ~ s(x, by = group),
+                      family = cox.ph(),
+                      weights = status,
+                      data = dat)
 
 # Plot with interaction
 splineplot(fit_interaction, dat,
