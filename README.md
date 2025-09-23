@@ -15,7 +15,7 @@ issues](https://img.shields.io/github/issues/jinseob2kim/splineplot.svg)](https:
 [![GitHub
 stars](https://img.shields.io/github/stars/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/stargazers)
 [![GitHub
-license](https://img.shields.io/github/license/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/blob/main/LICENSE)
+license](https://img.shields.io/github/license/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
@@ -272,8 +272,7 @@ like to change.
 
 ## License
 
-Apache License 2.0 © Jinseob Kim / Zarathu - see the LICENSE file for
-details.
+Apache License 2.0 © Jinseob Kim / Zarathu.
 
 ## Acknowledgments
 
