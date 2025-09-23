@@ -5,10 +5,11 @@ Version: 0.1.1
 Maintainer: Jinseob Kim <jinseob2kim@gmail.com>
 Authors@R: c(person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
              person("Zarathu", role = c("cph", "fnd")))
-Description: Creates 'ggplot2'-based visualizations of smooth effects from GAM models
-    fitted with 'mgcv' and spline effects from GLM models. Supports interaction terms
+Description: Creates 'ggplot2'-based visualizations of smooth effects from GAM (Generalized Additive Models)
+    fitted with 'mgcv' and spline effects from GLM (Generalized Linear Models). Supports interaction terms
     and provides hazard ratio plots with histograms for survival analysis.
-License: Apache License 2.0 | file LICENSE
+    Wood (2017, ISBN:9781498728331) provides comprehensive methodology for GAMs.
+License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true
 Imports:
