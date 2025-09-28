@@ -11,3 +11,5 @@ inst/doc
 tests/*.R
 !tests/testthat/*.R
 README.html
+/doc/
+/Meta/

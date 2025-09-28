@@ -1,7 +1,7 @@
 Package: splineplot
 Type: Package
 Title: Visualization of Spline Effects in GAM and GLM Models
-Version: 0.1.1
+Version: 0.2.0
 Maintainer: Jinseob Kim <jinseob2kim@gmail.com>
 Authors@R: c(person("Jinseob", "Kim", email = "jinseob2kim@gmail.com", role = c("aut", "cre"),  comment = c(ORCID = "0000-0002-9403-605X")),
              person("Zarathu", role = c("cph", "fnd")))

@@ -483,16 +483,16 @@ extract_spline_data <- function(fit, data, xvar, refx,
   }
 
   # Calculate y values based on model family and log_scale
+  # ALWAYS use log scale internally for ratio metrics to avoid scale issues
   if (model_info$family %in% c("cox", "binomial", "poisson")) {
+    # Always keep as log scale for plotting
+    y <- diff
+    lcl <- diff - z_score * se_diff
+    ucl <- diff + z_score * se_diff
+    # Label changes based on log_scale
     if (log_scale) {
-      y <- diff
-      lcl <- diff - z_score * se_diff
-      ucl <- diff + z_score * se_diff
       ylabel <- paste("Log", model_info$ylabel)
     } else {
-      y <- exp(diff)
-      lcl <- exp(diff - z_score * se_diff)
-      ucl <- exp(diff + z_score * se_diff)
       ylabel <- model_info$ylabel
     }
   } else {
@@ -639,16 +639,12 @@ extract_spline_interaction <- function(fit, data, xvar, by_var, refx,
     }
 
     # Calculate y values based on model family and log_scale
+    # ALWAYS use log scale internally for ratio metrics to avoid scale issues
     if (model_info$family %in% c("cox", "binomial", "poisson")) {
-      if (log_scale) {
-        y <- diff
-        lcl <- diff - z_score * se_diff
-        ucl <- diff + z_score * se_diff
-      } else {
-        y <- exp(diff)
-        lcl <- exp(diff - z_score * se_diff)
-        ucl <- exp(diff + z_score * se_diff)
-      }
+      # Always keep as log scale for plotting
+      y <- diff
+      lcl <- diff - z_score * se_diff
+      ucl <- diff + z_score * se_diff
     } else {
       # For gaussian/linear models
       y <- diff
@@ -666,6 +662,18 @@ extract_spline_interaction <- function(fit, data, xvar, by_var, refx,
   }
 
   df_curve <- do.call(rbind, result_list)
+
+  # Add ylabel column based on log_scale
+  if (model_info$family %in% c("cox", "binomial", "poisson")) {
+    if (log_scale) {
+      df_curve$ylabel <- paste("Log", model_info$ylabel)
+    } else {
+      df_curve$ylabel <- model_info$ylabel
+    }
+  } else {
+    df_curve$ylabel <- model_info$ylabel
+  }
+
   return(df_curve)
 }
 
@@ -679,26 +687,12 @@ plot_spline_single <- function(df_curve, xvar, xlim, ylim, show_hist, data, bins
   xv <- data[[xvar]]
 
   if (is.null(ylim)) {
-    # Auto-determine ylim based on model type and scale
-    if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
-      # For ratio scales (HR, OR, RR)
-      data_range <- range(c(df_curve$lcl, df_curve$ucl), na.rm = TRUE)
-      # Round to nice values
-      ylim <- c(
-        max(0.1, floor(data_range[1] * 10) / 10),
-        ceiling(data_range[2] * 2) / 2
-      )
-      # Common ranges
-      if (ylim[1] >= 0.2 && ylim[2] <= 2.5) {
-        ylim <- c(0.25, 2.0)
-      } else if (ylim[1] >= 0.1 && ylim[2] <= 5) {
-        ylim <- c(0.1, 5.0)
-      }
-    } else {
-      # For effect/log scales
-      ylim <- range(c(df_curve$lcl, df_curve$ucl), na.rm = TRUE)
-      ylim <- ylim + c(-0.1, 0.1) * diff(ylim)
-    }
+    # Auto-determine ylim - data is always in log scale for ratio metrics
+    ylim <- range(c(df_curve$lcl, df_curve$ucl), na.rm = TRUE)
+    ylim <- ylim + c(-0.1, 0.1) * diff(ylim)
+  } else if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
+    # User provided ylim in ratio scale (e.g., c(0.25, 4)), convert to log
+    ylim <- log(ylim)
   }
 
   # Always define axis limits for consistency
@@ -718,10 +712,12 @@ plot_spline_single <- function(df_curve, xvar, xlim, ylim, show_hist, data, bins
     h <- hist(xv, breaks = bins, plot = FALSE, include.lowest = TRUE, right = FALSE)
     pct <- 100 * h$counts / sum(h$counts)
 
+    # Histogram always starts at left_min (0% of secondary axis)
     df_hist <- data.frame(
       xmin = head(h$breaks, -1),
       xmax = tail(h$breaks, -1),
-      y = to_left(pct)
+      ymin = left_min,
+      ymax = to_left(pct)
     )
   } else {
     df_hist <- NULL
@@ -747,21 +743,25 @@ plot_spline_single <- function(df_curve, xvar, xlim, ylim, show_hist, data, bins
   }
 
   if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
-    # For ratio scales - create nice breaks
-    if (ylim[2] <= 2) {
-      y_breaks <- seq(ylim[1], ylim[2], by = 0.25)
-    } else if (ylim[2] <= 5) {
-      y_breaks <- seq(ylim[1], ylim[2], by = 0.5)
-    } else if (ylim[2] <= 10) {
-      y_breaks <- seq(ceiling(ylim[1]), floor(ylim[2]), by = 1)
+    # For ratio scales - create breaks in original scale, then convert to log
+    exp_ylim <- exp(ylim)
+    if (exp_ylim[2] <= 2) {
+      ratio_breaks <- c(0.25, 0.5, 1, 2)
+    } else if (exp_ylim[2] <= 4) {
+      ratio_breaks <- c(0.25, 0.5, 1, 2, 4)
+    } else if (exp_ylim[2] <= 10) {
+      ratio_breaks <- c(0.1, 0.25, 0.5, 1, 2, 5, 10)
     } else {
-      y_breaks <- pretty(ylim, n = 5)
+      ratio_breaks <- c(0.1, 0.5, 1, 2, 5, 10, 20)
     }
-    # Remove breaks outside ylim
-    y_breaks <- y_breaks[y_breaks >= ylim[1] & y_breaks <= ylim[2]]
+    # Filter to range and convert to log scale
+    ratio_breaks <- ratio_breaks[ratio_breaks >= exp_ylim[1] & ratio_breaks <= exp_ylim[2]]
+    y_breaks <- log(ratio_breaks)
+    y_labels <- format(ratio_breaks, drop0trailing = TRUE)
   } else {
     # For effect/log scales
     y_breaks <- pretty(ylim, n = 5)
+    y_labels <- format(y_breaks, drop0trailing = TRUE)
   }
 
   # Build plot
@@ -776,7 +776,7 @@ plot_spline_single <- function(df_curve, xvar, xlim, ylim, show_hist, data, bins
       df_hist$xmax <- pmin(df_hist$xmax, xlim[2])
     }
     p <- p + geom_rect(data = df_hist,
-                      aes(xmin = xmin, xmax = xmax, ymin = x_axis_y, ymax = y),
+                      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
                       fill = "grey80", color = "grey60", linewidth = 0.3, alpha = 0.85)
   }
 
@@ -803,35 +803,25 @@ plot_spline_single <- function(df_curve, xvar, xlim, ylim, show_hist, data, bins
       geom_line(data = df_curve_plot, aes(x = x, y = y), linewidth = 1.2)
   }
 
-  # Add reference line based on model family and scale
-  if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
-    ref_y <- 1
-    p <- p +
-      geom_hline(yintercept = ref_y, linetype = "dashed", linewidth = 0.35)
+  # Add reference line - always at 0 since data is in log scale
+  ref_y <- 0  # log(1) = 0 for ratio metrics, 0 for linear metrics
+  p <- p +
+    geom_hline(yintercept = ref_y, linetype = "dashed", linewidth = 0.35)
 
-    # Add reference point (◆) for HR/OR/RR
-    if (show_ref_point && !is.null(refx)) {
-      if (is.null(xlim) || (refx >= xlim[1] && refx <= xlim[2])) {
-        p <- p + annotate("point", x = refx, y = 1, shape = 18, size = 3, colour = "black")
-      }
-    }
-  } else {
-    ref_y <- 0
-    p <- p +
-      geom_hline(yintercept = ref_y, linetype = "dashed", linewidth = 0.35)
-
-    # Add reference point for effect scale
-    if (show_ref_point && !is.null(refx)) {
-      if (is.null(xlim) || (refx >= xlim[1] && refx <= xlim[2])) {
-        p <- p + annotate("point", x = refx, y = 0, shape = 18, size = 3, colour = "black")
-      }
+  # Add reference point (◆)
+  if (show_ref_point && !is.null(refx)) {
+    if (is.null(xlim) || (refx >= xlim[1] && refx <= xlim[2])) {
+      p <- p + annotate("point", x = refx, y = 0, shape = 18, size = 3, colour = "black")
     }
   }
+
+  # Need extra space below x-axis for ticks
+  tick_len <- (left_max - left_min) * 0.02
 
   p <- p +
     # Axis settings
     coord_cartesian(xlim = c(x_min, x_max),
-                   ylim = c(x_axis_y - 0.05, ylim[2]),
+                   ylim = c(x_axis_y - tick_len - 0.02, ylim[2]),
                    clip = "off") +
     scale_x_continuous(limits = c(x_min, x_max), expand = c(0, 0)) +
     labs(x = if (!is.null(xlab)) xlab else xvar)
@@ -839,20 +829,40 @@ plot_spline_single <- function(df_curve, xvar, xlim, ylim, show_hist, data, bins
   # Y-axis settings (y_breaks already defined earlier)
 
   if (show_hist) {
-    p <- p + scale_y_continuous(
-      limits = c(x_axis_y - 0.05, ylim[2]),
-      breaks = y_breaks,
-      labels = function(x) ifelse(x >= ylim[1], format(x, nsmall = 2), ""),
-      name = ylabel,
-      sec.axis = sec_axis(~ from_left(.), name = ylab_right)
-    )
+    if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
+      # Use custom labels for ratio scales
+      p <- p + scale_y_continuous(
+        limits = c(x_axis_y - tick_len - 0.02, ylim[2]),
+        breaks = y_breaks,
+        labels = y_labels,
+        name = ylabel,
+        sec.axis = sec_axis(~ from_left(.), name = ylab_right)
+      )
+    } else {
+      p <- p + scale_y_continuous(
+        limits = c(x_axis_y - tick_len - 0.02, ylim[2]),
+        breaks = y_breaks,
+        labels = y_labels,
+        name = ylabel,
+        sec.axis = sec_axis(~ from_left(.), name = ylab_right)
+      )
+    }
   } else {
-    p <- p + scale_y_continuous(
-      limits = c(x_axis_y - 0.05, ylim[2]),  # Same as coord_cartesian
-      breaks = y_breaks,
-      labels = function(x) ifelse(x >= ylim[1], format(x, nsmall = 2), ""),
-      name = ylabel
-    )
+    if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
+      p <- p + scale_y_continuous(
+        limits = c(x_axis_y - tick_len - 0.02, ylim[2]),
+        breaks = y_breaks,
+        labels = y_labels,
+        name = ylabel
+      )
+    } else {
+      p <- p + scale_y_continuous(
+        limits = c(x_axis_y - tick_len - 0.02, ylim[2]),
+        breaks = y_breaks,
+        labels = y_labels,
+        name = ylabel
+      )
+    }
   }
 
   p <- p +
@@ -896,7 +906,7 @@ plot_spline_single <- function(df_curve, xvar, xlim, ylim, show_hist, data, bins
   for(xb in x_breaks) {
     p <- p + annotate("segment",
                      x = xb, xend = xb,
-                     y = x_axis_y, yend = x_axis_y - tick_len,
+                     y = x_axis_y, yend = x_axis_y - tick_len,  # Draw ticks downward
                      colour = "black", linewidth = axis_lwd)
   }
 
@@ -912,26 +922,12 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
                                    xlab = NULL, ylab = NULL, ylab_right = "Percent of Population") {
 
   if (is.null(ylim)) {
-    # Auto-determine ylim based on model type and scale
-    if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
-      # For ratio scales (HR, OR, RR)
-      data_range <- range(c(df_curve$lcl, df_curve$ucl), na.rm = TRUE)
-      # Round to nice values
-      ylim <- c(
-        max(0.1, floor(data_range[1] * 10) / 10),
-        ceiling(data_range[2] * 2) / 2
-      )
-      # Common ranges
-      if (ylim[1] >= 0.2 && ylim[2] <= 2.5) {
-        ylim <- c(0.25, 2.0)
-      } else if (ylim[1] >= 0.1 && ylim[2] <= 5) {
-        ylim <- c(0.1, 5.0)
-      }
-    } else {
-      # For effect/log scales
-      ylim <- range(c(df_curve$lcl, df_curve$ucl), na.rm = TRUE)
-      ylim <- ylim + c(-0.1, 0.1) * diff(ylim)
-    }
+    # Auto-determine ylim - data is always in log scale for ratio metrics
+    ylim <- range(c(df_curve$lcl, df_curve$ucl), na.rm = TRUE)
+    ylim <- ylim + c(-0.1, 0.1) * diff(ylim)
+  } else if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
+    # User provided ylim in ratio scale (e.g., c(0.25, 4)), convert to log
+    ylim <- log(ylim)
   }
 
   # Default colors if not provided
@@ -974,10 +970,12 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
     h <- hist(xv, breaks = bins, plot = FALSE, include.lowest = TRUE, right = FALSE)
     pct <- 100 * h$counts / sum(h$counts)
 
+    # Histogram always starts at left_min (0% of secondary axis)
     df_hist <- data.frame(
       xmin = head(h$breaks, -1),
       xmax = tail(h$breaks, -1),
-      y = to_left(pct)
+      ymin = left_min,
+      ymax = to_left(pct)
     )
 
     # Filter histogram bars to xlim if specified
@@ -988,7 +986,7 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
     }
 
     p <- p + geom_rect(data = df_hist,
-                      aes(xmin = xmin, xmax = xmax, ymin = x_axis_y, ymax = y),
+                      aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax),
                       fill = "grey80", color = "grey60", linewidth = 0.3,
                       alpha = 0.85)
   }
@@ -1010,14 +1008,9 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
       geom_line(data = df_curve_plot, aes(x = x, y = y, group = group, color = group), linewidth = 1.2)
   }
 
-  # Add reference line and points
-  if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
-    ref_y <- 1
-    p <- p + geom_hline(yintercept = ref_y, linetype = "dashed", linewidth = 0.35)
-  } else {
-    ref_y <- 0
-    p <- p + geom_hline(yintercept = ref_y, linetype = "dashed", linewidth = 0.35)
-  }
+  # Add reference line - always at 0 since data is in log scale
+  ref_y <- 0  # log(1) = 0 for ratio metrics, 0 for linear metrics
+  p <- p + geom_hline(yintercept = ref_y, linetype = "dashed", linewidth = 0.35)
 
   # Add reference point (◆) if requested (and within xlim)
   if (show_ref_point && !is.null(refx)) {
@@ -1035,11 +1028,8 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
   if (!is.null(ylab)) {
     ylabel <- ylab
   } else {
-    ylabel <- if (log_scale && model_info$family %in% c("cox", "binomial", "poisson")) {
-      paste("Log", model_info$ylabel)
-    } else {
-      model_info$ylabel
-    }
+    # Use default label from df_curve (already set correctly in extract function)
+    ylabel <- df_curve$ylabel[1]
   }
 
   # Define x_min and x_max for coord_cartesian
@@ -1055,25 +1045,31 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
 
   # Define y_breaks for manual ticks
   if (model_info$family %in% c("cox", "binomial", "poisson") && !log_scale) {
-    # For ratio scales - create nice breaks
-    if (ylim[2] <= 2) {
-      y_breaks <- seq(ylim[1], ylim[2], by = 0.25)
-    } else if (ylim[2] <= 5) {
-      y_breaks <- seq(ylim[1], ylim[2], by = 0.5)
-    } else if (ylim[2] <= 10) {
-      y_breaks <- seq(ceiling(ylim[1]), floor(ylim[2]), by = 1)
+    # For ratio scales - create breaks in original scale, then convert to log
+    exp_ylim <- exp(ylim)
+    if (exp_ylim[2] <= 2) {
+      ratio_breaks <- c(0.25, 0.5, 1, 2)
+    } else if (exp_ylim[2] <= 4) {
+      ratio_breaks <- c(0.25, 0.5, 1, 2, 4)
+    } else if (exp_ylim[2] <= 10) {
+      ratio_breaks <- c(0.1, 0.25, 0.5, 1, 2, 5, 10)
     } else {
-      y_breaks <- pretty(ylim, n = 5)
+      ratio_breaks <- c(0.1, 0.5, 1, 2, 5, 10, 20)
     }
-    # Remove breaks outside ylim
-    y_breaks <- y_breaks[y_breaks >= ylim[1] & y_breaks <= ylim[2]]
+    # Filter to range and convert to log scale
+    ratio_breaks <- ratio_breaks[ratio_breaks >= exp_ylim[1] & ratio_breaks <= exp_ylim[2]]
+    y_breaks <- log(ratio_breaks)
+    y_labels <- format(ratio_breaks, drop0trailing = TRUE)
   } else {
     # For effect/log scales
     y_breaks <- pretty(ylim, n = 5)
+    y_labels <- format(y_breaks, drop0trailing = TRUE)
   }
 
-  # Adjust ylim to include floating X-axis
-  plot_ylim <- c(x_axis_y - 0.05, left_max)
+  # Need extra space below x-axis for ticks
+  tick_len <- (left_max - left_min) * 0.02
+  # Adjust ylim to include floating X-axis and ticks
+  plot_ylim <- c(x_axis_y - tick_len - 0.02, left_max)
 
   p <- p +
     coord_cartesian(xlim = c(x_min, x_max),
@@ -1087,7 +1083,7 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
     p <- p + scale_y_continuous(
       limits = plot_ylim,
       breaks = y_breaks,
-      labels = function(x) ifelse(x >= left_min, format(x, nsmall = 2), ""),
+      labels = y_labels,
       name = ylabel,
       expand = c(0, 0),
       sec.axis = sec_axis(~ from_left(.), name = ylab_right)
@@ -1096,7 +1092,7 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
     p <- p + scale_y_continuous(
       limits = plot_ylim,
       breaks = y_breaks,
-      labels = function(x) ifelse(x >= left_min, format(x, nsmall = 2), ""),
+      labels = y_labels,
       name = ylabel,
       expand = c(0, 0)
     )
@@ -1144,7 +1140,7 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
   for(xb in x_breaks) {
     p <- p + annotate("segment",
                      x = xb, xend = xb,
-                     y = x_axis_y, yend = x_axis_y - tick_len,
+                     y = x_axis_y, yend = x_axis_y - tick_len,  # Draw ticks downward
                      colour = "black", linewidth = axis_lwd)
   }
 

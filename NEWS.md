@@ -1,3 +1,23 @@
+# splineplot 0.2.0
+
+## Major Improvements
+* **Y-axis scaling**: Implemented proper ratio scale display for HR/OR/RR when `log_scale=FALSE`
+  - Shows actual ratio values (e.g., 0.5, 1, 2) instead of log values
+  - Automatically selects appropriate breaks based on data range
+  - Removes trailing zeros from labels (1.50 → 1.5)
+* **X-axis improvements**:
+  - Fixed X-axis tick visibility and direction (now properly pointing downward)
+  - Adjusted plot limits to ensure ticks are always visible
+* **Histogram alignment**: Base of histogram now correctly aligns with secondary Y-axis 0%
+* **Internal refactoring**: Simplified data handling by always using log scale internally for ratio metrics
+  - `log_scale` parameter now only affects Y-axis label display
+  - More consistent and predictable behavior
+
+## Bug Fixes
+* Fixed missing Y-axis labels in GAM interaction plots
+* Corrected reference line position (always at y=0 for log scale, which represents ratio=1)
+* Fixed ylabel column missing in `extract_spline_interaction()` output
+
 # splineplot 0.1.1
 
 ## Bug Fixes
