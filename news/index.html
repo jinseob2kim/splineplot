@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">splineplot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -36,6 +36,37 @@
       <small>Source: <a href="https://github.com/jinseob2kim/splineplot/blob/HEAD/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.0" id="splineplot-020">splineplot 0.2.0<a class="anchor" aria-label="anchor" href="#splineplot-020"></a></h2>
+<div class="section level3">
+<h3 id="major-improvements-0-2-0">Major Improvements<a class="anchor" aria-label="anchor" href="#major-improvements-0-2-0"></a></h3>
+<ul><li>
+<strong>Y-axis scaling</strong>: Implemented proper ratio scale display for HR/OR/RR when <code>log_scale=FALSE</code>
+<ul><li>Shows actual ratio values (e.g., 0.5, 1, 2) instead of log values</li>
+<li>Automatically selects appropriate breaks based on data range</li>
+<li>Removes trailing zeros from labels (1.50 → 1.5)</li>
+</ul></li>
+<li>
+<strong>X-axis improvements</strong>:
+<ul><li>Fixed X-axis tick visibility and direction (now properly pointing downward)</li>
+<li>Adjusted plot limits to ensure ticks are always visible</li>
+</ul></li>
+<li>
+<strong>Histogram alignment</strong>: Base of histogram now correctly aligns with secondary Y-axis 0%</li>
+<li>
+<strong>Internal refactoring</strong>: Simplified data handling by always using log scale internally for ratio metrics
+<ul><li>
+<code>log_scale</code> parameter now only affects Y-axis label display</li>
+<li>More consistent and predictable behavior</li>
+</ul></li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-0-2-0">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2-0"></a></h3>
+<ul><li>Fixed missing Y-axis labels in GAM interaction plots</li>
+<li>Corrected reference line position (always at y=0 for log scale, which represents ratio=1)</li>
+<li>Fixed ylabel column missing in <code>extract_spline_interaction()</code> output</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.1" id="splineplot-011">splineplot 0.1.1<a class="anchor" aria-label="anchor" href="#splineplot-011"></a></h2>
 <div class="section level3">
