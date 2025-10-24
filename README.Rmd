@@ -25,7 +25,6 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/jinseob2kim/splineplot/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jinseob2kim/splineplot?branch=main)
 [![GitHub issues](https://img.shields.io/github/issues/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/issues)
 [![GitHub stars](https://img.shields.io/github/stars/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/stargazers)
-[![GitHub license](https://img.shields.io/github/license/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/blob/main/LICENSE)
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
 
@@ -199,7 +198,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 
 ## License
 
-Apache License 2.0 © Jinseob Kim / Zarathu - see the LICENSE file for details.
+Apache License 2.0 © Jinseob Kim / Zarathu
 
 ## Acknowledgments
 

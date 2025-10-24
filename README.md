@@ -14,8 +14,6 @@ coverage](https://codecov.io/gh/jinseob2kim/splineplot/branch/main/graph/badge.s
 issues](https://img.shields.io/github/issues/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/issues)
 [![GitHub
 stars](https://img.shields.io/github/stars/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/stargazers)
-[![GitHub
-license](https://img.shields.io/github/license/jinseob2kim/splineplot.svg)](https://github.com/jinseob2kim/splineplot/blob/main/LICENSE)
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 <!-- badges: end -->
@@ -90,8 +88,6 @@ splineplot(fit_gam_cox, dat,
           ylab = "Hazard Ratio")
 #> Using 'x' as x variable
 #> Using refx = 35.17 (median of x)
-#> Warning: Removed 2 rows containing missing values or values outside the scale range
-#> (`geom_rect()`).
 #> Warning: Removed 61 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 #> Warning: Removed 56 rows containing missing values or values outside the scale range
@@ -115,8 +111,6 @@ splineplot(fit_glm, dat,
           ylab = "Odds Ratio")
 #> Using 'x' as x variable
 #> Using refx = 35.17 (median of x)
-#> Warning: Removed 2 rows containing missing values or values outside the scale range
-#> (`geom_rect()`).
 #> Warning: Removed 34 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 #> Warning: Removed 85 rows containing missing values or values outside the scale range
@@ -147,8 +141,6 @@ splineplot(fit_interaction, dat,
 #> Using refx = 35.17 (median of x)
 #> Warning: No shared levels found between `names(values)` of the manual scale and the
 #> data's fill values.
-#> Warning: Removed 2 rows containing missing values or values outside the scale range
-#> (`geom_rect()`).
 #> Warning: Removed 124 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 #> Warning: Removed 116 rows containing missing values or values outside the scale range
@@ -178,8 +170,6 @@ splineplot(fit_gam_cox, dat, ribbon_ci = TRUE)
 splineplot(fit_glm, dat, log_scale = TRUE)
 #> Using 'x' as x variable
 #> Using refx = 35.17 (median of x)
-#> Warning: Removed 2 rows containing missing values or values outside the scale range
-#> (`geom_rect()`).
 ```
 
 <img src="man/figures/README-log-scale-1.png" width="100%" />
@@ -192,8 +182,6 @@ splineplot(fit_gam_cox, dat,
           refx = 40,  # Reference at x = 40
           show_ref_point = TRUE)  # Show diamond marker
 #> Using 'x' as x variable
-#> Warning: Removed 2 rows containing missing values or values outside the scale range
-#> (`geom_rect()`).
 ```
 
 <img src="man/figures/README-custom-ref-1.png" width="100%" />
@@ -252,8 +240,7 @@ like to change.
 
 ## License
 
-Apache License 2.0 © Jinseob Kim / Zarathu - see the LICENSE file for
-details.
+Apache License 2.0 © Jinseob Kim / Zarathu
 
 ## Acknowledgments
 
