@@ -1,3 +1,12 @@
+# splineplot 0.2.1
+
+## Bug Fixes
+* Fixed lines being drawn outside Y-axis limits when confidence intervals exceed ylim range
+  - Lines now properly stop when they go out of bounds instead of extending beyond axis limits
+  - Each line (main curve, lower CI, upper CI) is handled independently
+  - If lower CI goes below ylim, only that line is clipped while upper CI continues if still in range
+  - Ensures clean, professional-looking plots that respect specified axis boundaries
+
 # splineplot 0.2.0
 
 ## Major Improvements

@@ -783,8 +783,13 @@ plot_spline_single <- function(df_curve, xvar, xlim, ylim, show_hist, data, bins
   # Filter curve data to xlim if specified
   df_curve_plot <- df_curve
   if (!is.null(xlim)) {
-    df_curve_plot <- df_curve[df_curve$x >= xlim[1] & df_curve$x <= xlim[2], ]
+    df_curve_plot <- df_curve_plot[df_curve_plot$x >= xlim[1] & df_curve_plot$x <= xlim[2], ]
   }
+  # Set values outside ylim to NA so lines are not drawn outside range
+  # This breaks the line where it goes out of bounds
+  df_curve_plot$y[df_curve_plot$y < ylim[1] | df_curve_plot$y > ylim[2]] <- NA
+  df_curve_plot$lcl[df_curve_plot$lcl < ylim[1] | df_curve_plot$lcl > ylim[2]] <- NA
+  df_curve_plot$ucl[df_curve_plot$ucl < ylim[1] | df_curve_plot$ucl > ylim[2]] <- NA
 
   # Add confidence intervals based on ribbon_ci option
   if (ribbon_ci) {
@@ -940,8 +945,13 @@ plot_spline_interaction <- function(df_curve, xvar, by_var, xlim, ylim, colors,
   # Filter data to xlim if specified
   df_curve_plot <- df_curve
   if (!is.null(xlim)) {
-    df_curve_plot <- df_curve[df_curve$x >= xlim[1] & df_curve$x <= xlim[2], ]
+    df_curve_plot <- df_curve_plot[df_curve_plot$x >= xlim[1] & df_curve_plot$x <= xlim[2], ]
   }
+  # Set values outside ylim to NA so lines are not drawn outside range
+  # This breaks the line where it goes out of bounds
+  df_curve_plot$y[df_curve_plot$y < ylim[1] | df_curve_plot$y > ylim[2]] <- NA
+  df_curve_plot$lcl[df_curve_plot$lcl < ylim[1] | df_curve_plot$lcl > ylim[2]] <- NA
+  df_curve_plot$ucl[df_curve_plot$ucl < ylim[1] | df_curve_plot$ucl > ylim[2]] <- NA
 
   # Always define axis limits for consistency
   left_min <- ylim[1]

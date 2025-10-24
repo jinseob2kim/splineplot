@@ -24,7 +24,7 @@ with automatic detection of model types and customizable aesthetics.">
 
     <a class="navbar-brand me-2" href="index.html">splineplot</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -121,13 +121,11 @@ with automatic detection of model types and customizable aesthetics.">
 <span>          ylab <span class="op">=</span> <span class="st">"Hazard Ratio"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Using 'x' as x variable</span></span>
 <span><span class="co">#&gt; Using refx = 35.17 (median of x)</span></span>
-<span><span class="co">#&gt; Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_rect()`).</span></span>
-<span><span class="co">#&gt; Warning: Removed 61 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; Warning: Removed 67 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
 <span><span class="co">#&gt; Warning: Removed 56 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
-<span><span class="co">#&gt; Warning: Removed 54 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; Warning: Removed 62 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre></div>
 <p><img src="reference/figures/README-gam-cox-1.png" width="100%"></p>
 </div>
@@ -145,9 +143,7 @@ with automatic detection of model types and customizable aesthetics.">
 <span>          ylab <span class="op">=</span> <span class="st">"Odds Ratio"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Using 'x' as x variable</span></span>
 <span><span class="co">#&gt; Using refx = 35.17 (median of x)</span></span>
-<span><span class="co">#&gt; Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_rect()`).</span></span>
-<span><span class="co">#&gt; Warning: Removed 34 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; Warning: Removed 37 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
 <span><span class="co">#&gt; Warning: Removed 85 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
@@ -176,13 +172,11 @@ with automatic detection of model types and customizable aesthetics.">
 <span><span class="co">#&gt; Using refx = 35.17 (median of x)</span></span>
 <span><span class="co">#&gt; Warning: No shared levels found between `names(values)` of the manual scale and the</span></span>
 <span><span class="co">#&gt; data's fill values.</span></span>
-<span><span class="co">#&gt; Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_rect()`).</span></span>
-<span><span class="co">#&gt; Warning: Removed 124 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; Warning: Removed 136 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
 <span><span class="co">#&gt; Warning: Removed 116 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span>
-<span><span class="co">#&gt; Warning: Removed 110 rows containing missing values or values outside the scale range</span></span>
+<span><span class="co">#&gt; Warning: Removed 126 rows containing missing values or values outside the scale range</span></span>
 <span><span class="co">#&gt; (`geom_line()`).</span></span></code></pre></div>
 <p><img src="reference/figures/README-gam-interaction-1.png" width="100%"></p>
 </div>
@@ -207,9 +201,7 @@ with automatic detection of model types and customizable aesthetics.">
 <code class="sourceCode R"><span><span class="co"># Use log scale for y-axis</span></span>
 <span><span class="fu"><a href="reference/splineplot.html">splineplot</a></span><span class="op">(</span><span class="va">fit_glm</span>, <span class="va">dat</span>, log_scale <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Using 'x' as x variable</span></span>
-<span><span class="co">#&gt; Using refx = 35.17 (median of x)</span></span>
-<span><span class="co">#&gt; Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_rect()`).</span></span></code></pre></div>
+<span><span class="co">#&gt; Using refx = 35.17 (median of x)</span></span></code></pre></div>
 <p><img src="reference/figures/README-log-scale-1.png" width="100%"></p>
 </div>
 <div class="section level3">
@@ -220,9 +212,7 @@ with automatic detection of model types and customizable aesthetics.">
 <span><span class="fu"><a href="reference/splineplot.html">splineplot</a></span><span class="op">(</span><span class="va">fit_gam_cox</span>, <span class="va">dat</span>,</span>
 <span>          refx <span class="op">=</span> <span class="fl">40</span>,  <span class="co"># Reference at x = 40</span></span>
 <span>          show_ref_point <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>  <span class="co"># Show diamond marker</span></span>
-<span><span class="co">#&gt; Using 'x' as x variable</span></span>
-<span><span class="co">#&gt; Warning: Removed 2 rows containing missing values or values outside the scale range</span></span>
-<span><span class="co">#&gt; (`geom_rect()`).</span></span></code></pre></div>
+<span><span class="co">#&gt; Using 'x' as x variable</span></span></code></pre></div>
 <p><img src="reference/figures/README-custom-ref-1.png" width="100%"></p>
 </div>
 </div>
@@ -387,7 +377,7 @@ with automatic detection of model types and customizable aesthetics.">
 <div class="section level2">
 <h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
-<p>Apache License 2.0 © Jinseob Kim / Zarathu - see the LICENSE file for details.</p>
+<p>Apache License 2.0 © Jinseob Kim / Zarathu</p>
 </div>
 <div class="section level2">
 <h2 id="acknowledgments">Acknowledgments<a class="anchor" aria-label="anchor" href="#acknowledgments"></a>
@@ -398,6 +388,7 @@ with automatic detection of model types and customizable aesthetics.">
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
+<li><a href="https://cloud.r-project.org/package=splineplot" class="external-link">View on CRAN</a></li>
 <li><a href="https://github.com/jinseob2kim/splineplot/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/jinseob2kim/splineplot/issues" class="external-link">Report a bug</a></li>
 </ul>

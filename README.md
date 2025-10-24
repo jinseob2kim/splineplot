@@ -88,11 +88,11 @@ splineplot(fit_gam_cox, dat,
           ylab = "Hazard Ratio")
 #> Using 'x' as x variable
 #> Using refx = 35.17 (median of x)
-#> Warning: Removed 61 rows containing missing values or values outside the scale range
+#> Warning: Removed 67 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 #> Warning: Removed 56 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
-#> Warning: Removed 54 rows containing missing values or values outside the scale range
+#> Warning: Removed 62 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 ```
 
@@ -111,7 +111,7 @@ splineplot(fit_glm, dat,
           ylab = "Odds Ratio")
 #> Using 'x' as x variable
 #> Using refx = 35.17 (median of x)
-#> Warning: Removed 34 rows containing missing values or values outside the scale range
+#> Warning: Removed 37 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 #> Warning: Removed 85 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
@@ -141,11 +141,11 @@ splineplot(fit_interaction, dat,
 #> Using refx = 35.17 (median of x)
 #> Warning: No shared levels found between `names(values)` of the manual scale and the
 #> data's fill values.
-#> Warning: Removed 124 rows containing missing values or values outside the scale range
+#> Warning: Removed 136 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 #> Warning: Removed 116 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
-#> Warning: Removed 110 rows containing missing values or values outside the scale range
+#> Warning: Removed 126 rows containing missing values or values outside the scale range
 #> (`geom_line()`).
 ```
 
