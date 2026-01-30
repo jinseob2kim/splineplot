@@ -371,7 +371,7 @@ extract_spline_data <- function(fit, data, xvar, refx,
       if (is.numeric(data[[var]])) {
         nd[[var]] <- median(data[[var]], na.rm = TRUE)
       } else if (is.factor(data[[var]])) {
-        nd[[var]] <- levels(data[[var]])[1]
+        nd[[var]] <- factor(levels(data[[var]])[1], levels = levels(data[[var]]))
       } else {
         nd[[var]] <- data[[var]][1]
       }

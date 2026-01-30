@@ -1,3 +1,11 @@
+# splineplot 0.2.2
+
+## Bug Fixes
+* Fixed error when plotting Cox/GLM models with categorical covariates
+  - `extract_spline_data()` now properly preserves factor levels when creating prediction data
+  - Previously caused "contrasts can be applied only to factors with 2 or more levels" error
+  - Affects models like `coxph(Surv(time, status) ~ ns(x, df=4) + sex + age_group, data=dat)`
+
 # splineplot 0.2.1
 
 ## Bug Fixes
