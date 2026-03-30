@@ -26,7 +26,7 @@ splineplot(
 )
 }
 \arguments{
-\item{fit}{A fitted model object (gam, glm, lm, coxph)}
+\item{fit}{A fitted model object (gam, glm, lm, coxph, svyglm, svycoxph)}
 
 \item{data}{The data frame used to fit the model}
 

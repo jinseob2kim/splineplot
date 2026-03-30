@@ -1,3 +1,14 @@
+# splineplot 0.3.0
+
+## New Features
+* **Survey-weighted model support**: Added support for `svyglm` and `svycoxph` models from the `survey` package
+  - `svyglm`: Survey-weighted GLM models (logistic, Poisson, Gaussian) with `ns()` or `bs()` splines
+  - `svycoxph`: Survey-weighted Cox proportional hazards models with `ns()` or `bs()` splines
+  - Uses spline-coefficient extraction approach to avoid `model.matrix` contrasts issues with survey objects
+  - Supports both single spline terms and interaction terms (`ns(x) * group`)
+  - Survey-adjusted variance-covariance matrix (sandwich estimator) is properly used for confidence intervals
+* Moved `splines` from Suggests to Imports for direct basis construction in survey model path
+
 # splineplot 0.2.2
 
 ## Bug Fixes

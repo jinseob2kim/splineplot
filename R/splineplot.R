@@ -11,11 +11,11 @@ utils::globalVariables(c("x", "y", "group", "lcl", "ucl", "xmin", "xmax", "ymin"
 #' @importFrom ggplot2 annotate coord_cartesian scale_x_continuous scale_y_continuous
 #' @importFrom ggplot2 labs theme theme_bw element_blank element_line element_text
 #' @importFrom ggplot2 margin sec_axis scale_color_manual scale_fill_manual
-#' @importFrom stats coef vcov predict median qnorm setNames terms model.matrix delete.response
+#' @importFrom stats coef vcov predict median qnorm setNames terms model.matrix delete.response formula
 #' @importFrom graphics hist
 #' @importFrom utils head tail
 #'
-#' @param fit A fitted model object (gam, glm, lm, coxph)
+#' @param fit A fitted model object (gam, glm, lm, coxph, svyglm, svycoxph)
 #' @param data The data frame used to fit the model
 #' @param xvar Character string specifying the variable name for x-axis (default: first spline term)
 #' @param by_var Character string specifying the interaction variable (default: auto-detect from model)
@@ -147,37 +147,51 @@ detect_model_info <- function(fit) {
       if (grepl("Cox", family_name, ignore.case = TRUE)) {
         model_family <- "cox"
         ylabel <- "Hazard Ratio"
-      } else if (family_name == "binomial") {
+      } else if (family_name %in% c("binomial", "quasibinomial")) {
         model_family <- "binomial"
         ylabel <- "Odds Ratio"
-      } else if (family_name == "poisson") {
+      } else if (family_name %in% c("poisson", "quasipoisson")) {
         model_family <- "poisson"
         ylabel <- "Rate Ratio"
       } else if (family_name == "gaussian") {
         model_family <- "gaussian"
         ylabel <- "Effect"
-      } else if (family_name == "quasipoisson") {
-        model_family <- "poisson"
-        ylabel <- "Rate Ratio"
       } else {
         model_family <- "gaussian"
         ylabel <- "Effect"
       }
     }
+  } else if (inherits(fit, "svycoxph")) {
+    model_type <- "svycoxph"
+    model_family <- "cox"
+    ylabel <- "Hazard Ratio"
   } else if (inherits(fit, "coxph")) {
     model_type <- "coxph"
     model_family <- "cox"
     ylabel <- "Hazard Ratio"
+  } else if (inherits(fit, "svyglm")) {
+    model_type <- "svyglm"
+    family_name <- fit$family$family
+    if (family_name %in% c("binomial", "quasibinomial")) {
+      model_family <- "binomial"
+      ylabel <- "Odds Ratio"
+    } else if (family_name %in% c("poisson", "quasipoisson")) {
+      model_family <- "poisson"
+      ylabel <- "Rate Ratio"
+    } else if (family_name == "gaussian") {
+      model_family <- "gaussian"
+      ylabel <- "Effect"
+    } else {
+      model_family <- "gaussian"
+      ylabel <- "Effect"
+    }
   } else if (inherits(fit, "glm")) {
     model_type <- "glm"
     family_name <- fit$family$family
-    if (family_name == "binomial") {
+    if (family_name %in% c("binomial", "quasibinomial")) {
       model_family <- "binomial"
       ylabel <- "Odds Ratio"
-    } else if (family_name == "poisson") {
-      model_family <- "poisson"
-      ylabel <- "Rate Ratio"
-    } else if (family_name == "quasipoisson") {
+    } else if (family_name %in% c("poisson", "quasipoisson")) {
       model_family <- "poisson"
       ylabel <- "Rate Ratio"
     } else if (family_name == "gaussian") {
@@ -192,7 +206,7 @@ detect_model_info <- function(fit) {
     model_family <- "gaussian"
     ylabel <- "Effect"
   } else {
-    stop("Unsupported model type. Use gam, glm, lm, or coxph models.")
+    stop("Unsupported model type. Use gam, glm, lm, coxph, svyglm, or svycoxph models.")
   }
 
   return(list(
@@ -200,6 +214,73 @@ detect_model_info <- function(fit) {
     family = model_family,
     ylabel = ylabel
   ))
+}
+
+#' Extract Spline Basis for Survey Models
+#'
+#' Extracts spline basis matrices (grid and reference) and coefficient indices
+#' for survey-weighted models (svyglm, svycoxph) where model.matrix approach
+#' fails due to contrasts issues.
+#'
+#' @noRd
+.get_survey_spline_basis <- function(fit, data, xvar, gx, refx) {
+  coef_names <- names(coef(fit))
+  xvar_escaped <- gsub("([.+*?^${}()|\\[\\]\\\\])", "\\\\\\1", xvar)
+
+  # Find all spline coefficient indices for this variable
+  all_spline_idx <- grep(paste0("(ns|bs)\\(", xvar_escaped), coef_names)
+  # Main effects: no colon (no interaction)
+  main_idx <- all_spline_idx[!grepl(":", coef_names[all_spline_idx])]
+
+  if (length(main_idx) == 0) {
+    stop("No ns() or bs() spline terms found for '", xvar, "' in model coefficients")
+  }
+
+  spline_type <- if (grepl("^ns\\(", coef_names[main_idx[1]])) "ns" else "bs"
+  n_basis <- length(main_idx)
+
+  # Try to extract knot attributes from model frame
+  ba <- NULL
+  if (!is.null(fit$model)) {
+    for (col_idx in seq_along(fit$model)) {
+      col_name <- names(fit$model)[col_idx]
+      if (is.matrix(fit$model[[col_idx]]) &&
+          grepl(paste0("^(ns|bs)\\(", xvar_escaped), col_name)) {
+        ba <- attributes(fit$model[[col_idx]])
+        break
+      }
+    }
+  }
+
+  # Fallback: reconstruct with same df from original data
+  xv <- data[[xvar]]
+  if (is.null(ba)) {
+    if (spline_type == "ns") {
+      temp_basis <- splines::ns(xv, df = n_basis)
+    } else {
+      temp_basis <- splines::bs(xv, df = n_basis)
+    }
+    ba <- attributes(temp_basis)
+  }
+
+  # Create basis for prediction grid and reference
+  if (spline_type == "ns") {
+    grid_basis <- splines::ns(gx, knots = ba$knots, Boundary.knots = ba$Boundary.knots)
+    ref_basis <- splines::ns(refx, knots = ba$knots, Boundary.knots = ba$Boundary.knots)
+  } else {
+    grid_basis <- splines::bs(gx, knots = ba$knots, Boundary.knots = ba$Boundary.knots,
+                               degree = ba$degree)
+    ref_basis <- splines::bs(refx, knots = ba$knots, Boundary.knots = ba$Boundary.knots,
+                              degree = ba$degree)
+  }
+
+  list(
+    main_idx = main_idx,
+    all_spline_idx = all_spline_idx,
+    grid_basis = as.matrix(grid_basis),
+    ref_basis = as.numeric(ref_basis),
+    spline_type = spline_type
+  )
 }
 
 #' Detect Spline Terms and Interactions
@@ -240,9 +321,9 @@ detect_spline_terms <- function(fit, model_info = NULL, xvar = NULL, by_var = NU
         }
       }
     }
-  } else if (model_info$type == "coxph") {
+  } else if (model_info$type %in% c("coxph", "svycoxph")) {
     # For Cox models, parse formula for spline terms
-    formula_str <- deparse(fit$formula)
+    formula_str <- deparse(formula(fit))
 
     if (is.null(detected_xvar)) {
       # Look for pspline(var), ns(var), bs(var)
@@ -270,9 +351,9 @@ detect_spline_terms <- function(fit, model_info = NULL, xvar = NULL, by_var = NU
         detected_by_var <- parts[parts != detected_xvar][1]
       }
     }
-  } else if (model_info$type %in% c("glm", "lm")) {
-    # For GLM/LM, parse formula for spline terms
-    formula_str <- deparse(fit$formula)
+  } else if (model_info$type %in% c("glm", "lm", "svyglm")) {
+    # For GLM/LM/svyglm, parse formula for spline terms
+    formula_str <- deparse(formula(fit))
 
     if (is.null(detected_xvar)) {
       # Look for ns(var), bs(var)
@@ -480,6 +561,17 @@ extract_spline_data <- function(fit, data, xvar, refx,
       diff <- as.numeric(C %*% b)
       se_diff <- sqrt(rowSums((C %*% V) * C))
     }
+  } else if (model_info$type %in% c("svyglm", "svycoxph")) {
+    # Survey models: extract spline coefficients directly
+    # (model.matrix approach fails with survey objects due to contrasts issues)
+    basis_info <- .get_survey_spline_basis(fit, data, xvar, gx, refx)
+
+    beta_spline <- coef(fit)[basis_info$main_idx]
+    V_spline <- vcov(fit)[basis_info$main_idx, basis_info$main_idx]
+
+    X_diff <- sweep(basis_info$grid_basis, 2, basis_info$ref_basis)
+    diff <- as.numeric(X_diff %*% beta_spline)
+    se_diff <- sqrt(pmax(rowSums((X_diff %*% V_spline) * X_diff), 0))
   }
 
   # Calculate y values based on model family and log_scale
@@ -526,7 +618,7 @@ extract_spline_interaction <- function(fit, data, xvar, by_var, refx,
   by_levels <- if (is.factor(data[[by_var]])) {
     levels(data[[by_var]])
   } else {
-    unique(data[[by_var]])
+    unique(data[[by_var]][!is.na(data[[by_var]])])
   }
 
   z_score <- qnorm((1 + ci_level) / 2)
@@ -620,6 +712,64 @@ extract_spline_interaction <- function(fit, data, xvar, by_var, refx,
         diff <- as.numeric(C %*% b)
         se_diff <- sqrt(rowSums((C %*% V) * C))
       }
+
+    } else if (model_info$type %in% c("svyglm", "svycoxph")) {
+      # Survey model: spline-coefficient extraction for interaction
+      basis_info <- .get_survey_spline_basis(fit, data, xvar, gx, refx)
+      coef_names <- names(coef(fit))
+      is_by_factor <- is.factor(data[[by_var]])
+      k <- length(basis_info$main_idx)
+
+      # Get interaction spline indices (those with ":")
+      all_int_spline <- basis_info$all_spline_idx[grepl(":", coef_names[basis_info$all_spline_idx])]
+      by_var_esc <- gsub("([.+*?^${}()|\\[\\]\\\\])", "\\\\\\1", by_var)
+
+      if (!is_by_factor) {
+        # Numeric by_var: effect at value L = (beta_main + L * beta_int) * basis
+        # Match ":by_var" at end or "by_var:" at start (no level suffix for numeric)
+        int_idx <- all_int_spline[
+          grepl(paste0(":", by_var_esc, "$"), coef_names[all_int_spline]) |
+          grepl(paste0("^", by_var_esc, ":"), coef_names[all_int_spline])
+        ]
+        L <- as.numeric(level)
+
+        if (!is.na(L) && length(int_idx) == k) {
+          all_idx <- c(basis_info$main_idx, int_idx)
+          beta_spline <- coef(fit)[basis_info$main_idx] + L * coef(fit)[int_idx]
+          V_all <- vcov(fit)[all_idx, all_idx]
+          V_spline <- V_all[1:k, 1:k] + L^2 * V_all[(k+1):(2*k), (k+1):(2*k)] +
+                      L * (V_all[1:k, (k+1):(2*k)] + V_all[(k+1):(2*k), 1:k])
+        } else {
+          beta_spline <- coef(fit)[basis_info$main_idx]
+          V_spline <- vcov(fit)[basis_info$main_idx, basis_info$main_idx]
+        }
+      } else {
+        # Factor by_var: reference level uses main only, others add interaction
+        is_ref_level <- isTRUE(as.character(level) == as.character(by_levels[1]))
+
+        if (is_ref_level || length(all_int_spline) == 0) {
+          beta_spline <- coef(fit)[basis_info$main_idx]
+          V_spline <- vcov(fit)[basis_info$main_idx, basis_info$main_idx]
+        } else {
+          level_str <- paste0(by_var, as.character(level))
+          int_idx <- all_int_spline[grepl(level_str, coef_names[all_int_spline], fixed = TRUE)]
+
+          if (length(int_idx) != k) {
+            beta_spline <- coef(fit)[basis_info$main_idx]
+            V_spline <- vcov(fit)[basis_info$main_idx, basis_info$main_idx]
+          } else {
+            all_idx <- c(basis_info$main_idx, int_idx)
+            beta_spline <- coef(fit)[basis_info$main_idx] + coef(fit)[int_idx]
+            V_all <- vcov(fit)[all_idx, all_idx]
+            V_spline <- V_all[1:k, 1:k] + V_all[(k+1):(2*k), (k+1):(2*k)] +
+                        V_all[1:k, (k+1):(2*k)] + V_all[(k+1):(2*k), 1:k]
+          }
+        }
+      }
+
+      X_diff <- sweep(basis_info$grid_basis, 2, basis_info$ref_basis)
+      diff <- as.numeric(X_diff %*% beta_spline)
+      se_diff <- sqrt(pmax(rowSums((X_diff %*% V_spline) * X_diff), 0))
 
     } else {
       # GLM/LM using model matrix approach
